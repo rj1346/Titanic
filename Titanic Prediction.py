@@ -5,21 +5,15 @@ import seaborn as sns
 
 #importing training data
 train= pd.read_csv('train.csv')
-print(train.shape)
-print(train.columns)
 
 #Preparing X_train data set
 X_train= train[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch','Embarked','Fare']]
-print(X_train.head())
-print(X_train.info())
-print(X_train.isnull().sum())
 sns.heatmap(X_train.isnull(), yticklabels=False)
 plt.show()
 
 X_train.Age= X_train['Age'].fillna(X_train.Age.mean())
 X_train.Embarked= X_train['Embarked'].fillna(X_train.Embarked.mode()[0])
 
-print(X_train.isnull().sum())
 sns.heatmap(X_train.isnull(), yticklabels=False)
 plt.show()
 
@@ -30,14 +24,12 @@ y_train= train[['Survived']]
 test= pd.read_csv('test.csv')
 X_test= test[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch','Embarked','Fare']]
 
-print(X_test.isnull().sum())
 sns.heatmap(X_test.isnull(),yticklabels=False)
 plt.show()
 
 X_test.Age= X_test['Age'].fillna(X_test.Age.mean())
 X_test.Fare= X_test['Fare'].fillna(X_test.Fare.mean())
 
-print(X_test.isnull().sum())
 sns.heatmap(X_test.isnull(),yticklabels=False)
 plt.show()
 
@@ -49,21 +41,40 @@ for i in features:
     X_train= pd.concat([X_train,dummy], axis=1)
     X_train.drop(i, axis=1, inplace=True)
 
-print(X_train.shape)
 
 for i in features:
     dummy= pd.get_dummies(X_test[i], drop_first=True)
     X_test= pd.concat([X_test,dummy], axis=1)
     X_test.drop(i, axis=1, inplace=True)
 
+# sklearn requires all column names to be the same type
+X_train.columns = X_train.columns.astype(str)
+X_test.columns = X_test.columns.astype(str)
 
 #Applying Logistic Regression
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 LogModel= LogisticRegression()
-LogModel.fit(X_train,y_train)
+y_train = train['Survived']
+LogModel.fit(X_train, y_train)
 
 y_pred= LogModel.predict(X_test)
 y_pred=pd.DataFrame(y_pred)
+print(y_pred.head())
+
+# Confusion matrix using the true labels from the test set
+true_labels = pd.read_csv('gender_submission.csv')['Survived']
+cm = confusion_matrix(true_labels, y_pred[0])
+print(cm)
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=['Predicted No', 'Predicted Yes'],
+            yticklabels=['Actual No', 'Actual Yes'])
+plt.xlabel('Predicted label')
+plt.ylabel('Actual label')
+plt.title('Confusion Matrix')
+plt.show()
 
 #Submission
 sample_submission= pd.read_csv('gender_submission.csv')
@@ -71,4 +82,4 @@ submission= pd.concat([sample_submission.PassengerId, y_pred], axis=1)
 submission.columns=['PassengerId','Survived']
 print(submission.head())
 
-submission.to_csv('Prediction by LogReg.csv', index=None)
+#submission.to_csv('Prediction by LogReg.csv', index=None)
