@@ -8,16 +8,12 @@ train= pd.read_csv('train.csv')
 
 #Preparing X_train data set
 X_train= train[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch','Embarked','Fare']]
-# print(X_train.head())
-# print(X_train.info())
-# print(X_train.isnull().sum())
 sns.heatmap(X_train.isnull(), yticklabels=False)
 plt.show()
 
 X_train.Age= X_train['Age'].fillna(X_train.Age.mean())
 X_train.Embarked= X_train['Embarked'].fillna(X_train.Embarked.mode()[0])
 
-#print(X_train.isnull().sum())
 sns.heatmap(X_train.isnull(), yticklabels=False)
 plt.show()
 
@@ -28,14 +24,12 @@ y_train= train[['Survived']]
 test= pd.read_csv('test.csv')
 X_test= test[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch','Embarked','Fare']]
 
-#print(X_test.isnull().sum())
 sns.heatmap(X_test.isnull(),yticklabels=False)
 plt.show()
 
 X_test.Age= X_test['Age'].fillna(X_test.Age.mean())
 X_test.Fare= X_test['Fare'].fillna(X_test.Fare.mean())
 
-#print(X_test.isnull().sum())
 sns.heatmap(X_test.isnull(),yticklabels=False)
 plt.show()
 
